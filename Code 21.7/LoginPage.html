@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="themes/YellowBlack.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body>
+
+<style>
+
+#logoimage{
+    padding-left:23%;
+}
+
+h2{
+    text-align:center;  
+}
+#logo{
+    height:55%;
+    width:55%;
+    padding-left:21%;
+    padding-top:5%;
+   
+}
+#logoDiv{
+
+}
+
+#brand{
+    height:15%;
+    width:18%;
+    padding-left:40%;
+}
+
+</style>    
+
+<div data-role="page" id='Home'>
+
+    <div data-role="header" data-type='horizontal'>
+        <img src="images/encompass_title.png" id="brand">
+    </div> <!-- /top navigation bar -->
+
+    <div id='loginPanel'>
+        <h3> Username: </h3>
+        <input type="text" id='username' name="username" placeholder='Enter your username' required><br>
+        <button onclick='login()'>Login</button>
+    </div>
+
+    <div data-role="footer" data-position="fixed">
+        <p style="text-align:center;"> &#169 Screens and Beyond | ALP 2016</p>
+    </div><!-- /footer -->
+</div>
+
+<script>
+
+function login(){
+    var username=document.getElementById('username').value;
+    //alert(username);
+    var userLogin= new XMLHttpRequest();
+    userLogin.onreadystatechange= function() {
+        if (userLogin.readyState == 4 && userLogin.status == 200) {
+            //alert(userLogin.responseText);
+            if (userLogin.responseText=='Success'){
+                document.cookie = "username="+username;
+                alert("Welcome " + username);
+                window.location.href = "Home.html";
+            }
+            else if(userLogin.responseText=='Taken'){
+                alert('Your username is taken, please enter another username');
+            }
+            else {
+                //alert('Please try again');
+				alert(userLogin.responseText);
+            }        
+        }
+    }
+    userLogin.open("GET","php/login.php?username="+username,true);
+    userLogin.send();
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+</script>
+</body>
+</html>
+
+
+

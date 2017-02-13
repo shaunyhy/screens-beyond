@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="themes/YellowBlack.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="lib/jquery.mobile.structure-1.4.5.min.css">
+    <script src="lib/jquery.js"></script>
+    <script src="lib/jquery.mobile-1.4.5.js"></script>
+    <script src="lib/jquery.form.js"></script>
+</head>
+
+<body onload='loader()'>
+
+<style>
+
+
+#brand{
+    height:15%;
+    width:18%;
+    padding-left:40%;
+}
+
+#compassContainer{
+    padding-left:20%;
+    padding-top:0%;
+    opacity:100%;
+}
+
+#compass{
+    width:75%;
+    height:75%;
+}
+
+#optionPanel{
+    background-color:#b2b2b2;
+}
+
+#panel, #flip {
+	font-size:17px;
+    padding-top:7px;
+    padding-bottom:8px;
+    text-align: center;
+}
+
+#panel {
+    display: none;
+}
+
+#flip{
+    border-color:#000000
+}
+#profilePic{
+    width:60%;
+    height:40%;
+    padding-left:50px;
+    padding-top:30px;
+}
+
+h3{
+    text-align:center;
+    font-size:30px;
+}
+#files{
+    background-color:#b2b2b2;
+}
+h4{
+    font-size:30px;
+    text-align:center;
+    background-color:#828282;
+    border:1px solid black;
+    color:#f4ca01;
+}
+#fileLocation{
+    background-color:#828282;
+    border:1px solid black;
+    color:#f4ca01;
+}
+
+#myForm{
+    padding:10px 10px 10px 10px;
+    background-color:#d6d6d6;
+}
+#optionsLogo, #filesLogo{
+    width:20%;
+    height:20%;
+    float:left;
+   
+
+}
+#optionsbtn, #filesbtn{
+    width:8%;
+}
+#roomsLogo, #historyLogo,#settingsLogo, #FAQLogo,#logoutLogo, #homeLogo {
+    width:10%;
+    height:10%;
+    float:left;
+}
+#uploading, #uploadingGif{
+    padding-left:21%;
+    padding-top:8%;
+    height:48%;
+    width:48%;
+    position:absolute;
+}
+#uploadingGif{
+    display:none;
+}
+.ui-content{
+    opacity:1;
+}
+h4{
+    border:0px;
+    font-size:40px;
+
+
+}
+</style>
+
+<div data-role="page" id='Room' data-theme="a">
+    <div data-role="panel" id="optionPanel" data-position="left" data-position="fixed">
+        <div id="profile">
+            <img src="images/ProfilePic.png" id="profilePic">
+            <h3 id='namedisplay'> Name </h3>
+        </div>
+
+        <a id='op'  href='Home.html' rel="external"class='ui-btn'><img src="images/home.png" id="homeLogo">Home</a>
+        <button id="flip" class='ui-btn'><img src="images/rooms.png" id="roomsLogo">Rooms</button>
+        <div id="panel">
+        </div>
+        <a id='op' href='Drive.html'rel="external" class='ui-btn'><img src="images/history.png" id="historyLogo">History</a>
+        <a id="op" href='Settings.html'rel="external" class='ui-btn' ><img src="images/settings.png" id="settingsLogo"> Settings</a>
+        <a id="op" href='FAQ.html'rel="external" class='ui-btn'><img src="images/faq.png" id="FAQLogo">FAQ</a>
+        <a id="op" href='LoginPage.html' onclick='logout()' class='ui-btn'><img src="images/logout.png" id="logoutLogo">Logout</a>
+    </div> 
+
+    <script>
+    $(document).ready(function(){
+        $("#flip").click(function(){
+            $("#panel").toggle("slow");
+        });
+    });
+    </script> 
+
+    <div data-role="panel" id="files" data-position="right" data-position="fixed">
+        <!--<h4>Files<br></h4>-->
+        <div id='fileLocation'></div>
+    </div>
+
+    <div data-role="header" data-type='horizontal'>
+        <a href="#optionPanel" class="ui-btn" id="optionsbtn"><img src="images/options.png" id="optionsLogo"> Options</a>
+        <img src="images/encompass_title.png" id="brand">
+        <a href="#files" class='ui-btn' id="filesbtn"><img src="images/files.png" id="filesLogo">Files</a>
+    </div>
+        
+    <div data-role="main" class="ui-content">
+        <div id="uploading" class="uploading">
+            <img src="images/EncompassGif.gif" id="uploadingGif">
+        </div>
+
+        <div class='fade'>
+            <div id = "compassContainer">
+                <p id='compassValue' style="position:absolute;z-index:100;left:42%;top:16.5%;font-size:100px;">123</p>
+                <img src = "images/compass_face.png" id ="compass"/>
+                <img src = "images/compass_back_room.png" style = "width:595px;height:595px;position:absolute;left:20.5%;top:5.5%;z-index:-1;opacity:0.7;" />
+            </div>
+            <div id = "stacking"></div>
+            
+            <div id='butt'> <button > Up or Down </button> </div>
+
+            <div id='up' style="display: none;">
+                <a href="#chooseFile" onclick='fill()' data-rel="popup" class="ui-btn">Upload</a>
+                <div data-role="popup" id="chooseFile" style="min-width:250px;">
+                    <form id="myForm"> 
+                        Room: <input type="text" name="roomdegree" id="room" readonly>
+                        Direction: <input type="text" name="filedegree" id="dir" readonly>
+                        File: <input type="file" name="file"><br>  
+                        <input type="submit" onclick='uploadingStart()' value="Upload"/> 
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id='down' style="display: none;">
+            <button onclick='download()' class='ui-btn'>Download</button>
+        </div>
+    </div>
+
+    <div data-role="footer" data-position="fixed">
+        <p style="text-align:center;">&#169 Screens and Beyond | ALP 2016</p>
+    </div>
+</div>
+
+
+<script>
+
+function loader(){
+    var user=getCookie('username');
+    var room=getCookie('currentroom');
+    var host=getCookie('host');
+    if (room==host){
+        document.getElementById('butt').innerHTML=document.getElementById('up').innerHTML;
+    }
+    else{
+        document.getElementById('butt').innerHTML=document.getElementById('down').innerHTML;
+    }
+    document.getElementById('namedisplay').innerHTML=user;
+    init();
+	var roomloader=setInterval(roomOnload,1000);
+}
+
+function getCompass(){
+    var compassReading= document.getElementById('compassValue').innerHTML;
+    return compassReading;
+}
+
+function init(){
+    var compass = document.getElementById('compass');
+    if(window.DeviceOrientationEvent){
+        window.addEventListener('deviceorientation',function(event){
+            var alpha;
+            alpha = event.alpha;
+            webkitAlpha = alpha;
+
+            correctedDeg = Math.round(360.0-alpha);
+            if(correctedDeg==360)
+                correctedDeg = 0
+
+            if(alpha!=null)
+                compassValue.innerHTML = correctedDeg;
+                if (correctedDeg<10) {
+                    compassValue.style.left = "47.5%";
+                } else if (correctedDeg<100) {
+                    compassValue.style.left = "44.5%";
+                } else {
+                    compassValue.style.left = "42%";
+                }
+
+            compass.style.Transform = 'rotate(' + alpha + 'deg)';
+            compass.style.WebkitTransform = 'rotate(' + webkitAlpha + 'deg)';
+            compass.style.MozTransform = 'rotate(-' + alpha + 'deg)';
+        }, false);
+    }
+}
+
+function roomOnload(){
+    var roomNo=getCookie('currentroom');
+    filelist(roomNo);
+    retrieveRooms();
+}
+
+
+function retrieveRooms(){
+    var username= getCookie('username');
+    //alert ('running');
+    var retRoom = new XMLHttpRequest();
+    retRoom.onreadystatechange= function(){
+        if (retRoom.readyState == 4 && retRoom.status == 200) {
+            //alert(retRoom.responseText);
+            var roomL=retRoom.responseText;
+            var unsortedArr=roomL.split(',');
+            var Arr= unsortedArr.sort();
+            var roomList=document.createElement('select');
+            for(var i=1; i<(Arr.length); i++){
+                var rooms=document.createElement('option');
+                var name=document.createTextNode(Arr[i]);
+                rooms.appendChild(name);
+                rooms.setAttribute('data-value',Arr[i]);
+                roomList.appendChild(rooms);
+            }
+            roomList.setAttribute('id','roomOptions');
+            roomList.setAttribute('onchange','filelist(this.value)');
+            var parent=document.getElementById('panel');
+            parent.replaceChild(roomList, parent.childNodes[0]);
+        }
+    }
+    var timestamp = new Date().getTime();
+    retRoom.open("GET", "php/roomList.php?username="+username+'&ts='+timestamp, true);
+    retRoom.send();  
+}
+
+function filelist(roomNo){
+    var room= 'Room'+roomNo;
+    var retFiles = new XMLHttpRequest();
+    retFiles.onreadystatechange= function(){
+        if (retFiles.readyState == 4 && retFiles.status == 200) {
+            var fileL=retFiles.responseText;
+            //alert(fileL);   
+            var Arr=fileL.split(';');
+            var fileList=document.createElement('ul');
+            var headTag=document.createElement('h4');
+            var headText=document.createTextNode('Files:');
+            headTag.appendChild(headText);
+            fileList.appendChild(headTag);
+
+            var compass_img = document.getElementById("stacking");
+            //compass_img.innerHTML = '<img src = "images/compass_face.png" style = "position:relative;z-index:0;transform-origin: 50% 50%;-webkit-transform-origin: 50% 50%;-moz-transform-origin: 50% 50%;" id = "compass" />'
+            
+            for(var i=0; i<(Arr.length-1); i++){
+                //alert(Arr[i]);
+                if (Arr[i]==','){
+                }
+                else{
+                    //Arr[i]= direction,name
+                    var file=Arr[i].split(',');
+                    var files=document.createElement('li');
+                    var name=document.createTextNode(file[1]+' at '+file[0]);
+                    files.appendChild(name);
+                    var idname='encompass'+file[0];
+                    //alert(typeof file[0]);
+                    files.setAttribute('id',idname);
+                    files.setAttribute('data-name',file[1])
+                    fileList.appendChild(files);
+                    var angle = file[0];
+                    var item = file[1];
+                    var exten = item.split(".")[1];
+                    var type, imgfile;
+                    switch(exten){
+                        case "jpg":
+                        case "png":
+                        case "bmp":
+                            type = "image";
+                            imgfile = "images/stack_pic.png";
+                            break;
+                        case "mp3":
+                            type = "music"
+                            imgfile = "images/stack_music.png";
+                            break;
+                        case "wmv":
+                        case "mp4":
+                            type = "video";
+                            imgfile = "images/stack_vid.png";
+                            break;
+                        case "doc":
+                        case "docx":
+                        case "txt":
+                            type = "document";
+                            imgfile = "images/stack_doc.png";
+                            break;
+                        default:
+                            type = "unidentified";
+                            imgfile = "images/stack_1.png";
+                    }
+                    zpos = i + 1;
+                    compass_img.innerHTML += '<img src = "'+ imgfile + '" style = "width:595px;height:595px;transform-origin: 50% 50%;-webkit-transform-origin: 50% 50%;-moz-transform-origin: 50% 50%;position:absolute;left:21%;top:5.5%;z-index:' + zpos + ';transform:rotate(' + (360-angle) + 'deg);" />';
+                }
+            }
+            fileList.setAttribute('id','fileLocation');
+            var parent=document.getElementById('files');
+            parent.replaceChild(fileList, parent.childNodes[0]);
+        }
+    }
+    var timestamp = new Date().getTime();
+    retFiles.open("GET", "php/fileList.php?room="+room+'&ts='+timestamp, true);
+    retFiles.send();  
+}
+
+
+
+//UPLOAD:
+$(document).ready(function() { 
+    //uploadingStart();
+    $('#myForm').ajaxForm({
+        url: 'php/upload.php',
+        type: 'post',
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            //uploadingEnd();
+            alert(response);
+            window.location.href="Room.html";
+        } 
+    }); 
+}); 
+
+
+function download(){
+    var direction= 'encompass'+getCompass();
+    var file=document.getElementById(direction);
+    if (file.innerHTML!==''){
+        var show=file.getAttribute('data-name');
+        alert('Downloading '+show);
+        url='php/files/'+show;
+        var downlink=document.createElement('a');
+        downlink.setAttribute('id',down);
+        downlink.setAttribute('href',url);
+        downlink.setAttribute('download',show);
+        downlink.click();
+    }
+    else{
+        alert('There is no file in this direction');
+    }
+}
+
+function fill(){
+    document.getElementById('room').value='Room'+getCookie('currentroom');
+    document.getElementById('dir').value=getCompass();
+}
+
+function logout(){
+    //alert('loggingout');
+    var user=getCookie('username');
+    var roomNo='Room'+getCookie('host');
+    var logout = new XMLHttpRequest(); 
+    logout.onreadystatechange= function() {
+        if (logout.readyState == 4 && logout.status == 200) {
+            alert(logout.responseText);
+            document.cookie='currentroom=';
+            document.cookie='host=';
+            document.cookie='username=';
+            window.location.href="Login.html";
+            //alert(logout.responseText);          
+        }
+    }    
+    logout.open("GET", "php/logout.php?username="+user+"&roomNumber="+roomNo, true);
+    logout.send();
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+</script>
+
+<script>
+function uploadingStart(){
+    document.getElementById("uploadingGif").style.display='block';
+    var x=document.getElementsByClassName("fade");
+    var i=x.length;
+    for (y=0;y<i;y++){
+        x[y].style.opacity="0.2";
+        document.getElementById("uploading").style.opacity='1';
+    }
+}
+
+</script>
+
+
+</body>
+</html>
+

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="themes/YellowBlack.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="lib/jquery.mobile.structure-1.4.5.min.css">
+    <script src="lib/jquery.js"></script>
+    <script src="lib/jquery.mobile-1.4.5.js"></script>
+    <script src="lib/jquery.form.js"></script>
+</head>
+
+<body onload='homeonload()'>
+
+<style>
+
+#brand{
+    height:15%;
+    width:18%;
+    padding-left:40%;
+}
+
+#compassContainer{
+    padding-left:26%;
+    padding-top:0%
+}
+
+#compass{
+    width:75%;
+    height:75%;
+}
+
+#panel, #flip {
+	font-size:25px;
+    padding: 5px;
+    text-align: center;
+}
+
+#panel {
+    display: none;
+}
+
+#flip{
+    border-color:#000000
+}
+
+#profilePic{
+    width:60%;
+    height:40%;
+    padding-left:50px;
+    padding-top:30px;
+}
+
+h3{
+    text-align:center;
+    font-size:30px;
+}
+#optionPanel{
+    background-color:#b2b2b2;
+}
+#optionsLogo, #filesLogo{
+    width:20%;
+    height:20%;
+   
+
+}
+#optionsbtn{
+    width:8%;
+}
+
+#roomsLogo, #historyLogo,#settingsLogo, #FAQLogo,#logoutLogo {
+    width:10%;
+    height:10%;
+    float:left;
+}
+#compassValue{
+    position:absolute;
+    z-index:100;
+    top:14.5%;
+    font-size:100px;"
+}
+#discoverRooms{
+    background-color:#828282;
+    border:1px solid black;
+    color:#f4ca01;
+}
+h4{
+    border:0px;
+    font-size:40px;
+	text-align:center;
+	color:#f4ca01;
+}
+#RL{
+    background-color:#b2b2b2;
+}
+
+</style>
+
+<div data-role="page" id='Room' data-theme="a">
+    <div data-role="panel" id="optionPanel" data-position="left" data-position="fixed">
+        <div id="profile">
+            <img src="images/ProfilePic.png" id="profilePic">
+            <h3 id='namedisplay'> Name </h3>
+        </div>
+     
+        <a id='op' onclick='roomCheck()' class='ui-btn' id="roomsbtn"><img src="images/rooms.png" id="roomsLogo"> Rooms</a>
+        <a id='op' href='Drive.html' rel="external" class='ui-btn'><img src="images/history.png" id="historyLogo">History</a>
+        <a id="op" href='Settings.html' rel="external"class='ui-btn' ><img src="images/settings.png" id="settingsLogo"> Settings</a>
+        <a id="op" href='FAQ.html' rel="external"class='ui-btn'><img src="images/faq.png" id="FAQLogo">FAQ</a>
+        <a id="op" href='LoginPage.html' onclick='logout()' class='ui-btn'><img src="images/logout.png" id="logoutLogo">Logout</a>
+    </div> 
+
+    <!--
+    <script>
+    $(document).ready(function(){
+        $("#flip").click(function(){
+            $("#panel").toggle("slow");
+        });
+    });
+    </script> 
+    -->
+    
+    <div data-role="panel" id="RL" data-position="right" data-position="fixed">
+    <h4>Rooms</h4>
+        <div id='discoverRooms'></div>
+    </div>
+
+    <div data-role="header" data-type='horizontal'>
+        <a href="#optionPanel" class="ui-btn" id="optionsbtn"><img src="images/options.png" id="optionsLogo"> Option</a>
+        <img src="images/encompass_title.png" id="brand">
+        <a href="#RL" class='ui-btn' id="discRoom" onclick='roomList()'>Discover</a>
+    </div>
+        
+    <div data-role="main" class="ui-content">
+        <div id = "compassContainer">
+            <p id='compassValue'></p>
+            <img src = "images/compass_face.png" id ="compass"/>
+            <img src = "images/compass_back_home.png" style = "width:595px;height:595px;position:absolute;left:24%;top:3.5%;z-index:-1;opacity:0.7;" />
+        </div>
+        <div id = "stacking"></div>
+
+        <button onclick='hostOrJoin()' id='actionButton'> Host/Join </button>
+    </div>
+
+    <div data-role="footer" data-position="fixed">
+        <p style="text-align:center;">&#169 Screens and Beyond | ALP 2016</p>
+    </div>
+</div>
+
+<script>
+
+function getCompass(){
+    var compassReading= document.getElementById('compassValue').innerHTML;
+    return compassReading;
+}
+
+function init(){
+    var compass = document.getElementById('compass');
+    if(window.DeviceOrientationEvent){
+        window.addEventListener('deviceorientation',function(event){
+            var alpha;
+            alpha = event.alpha;
+            webkitAlpha = alpha;
+
+            correctedDeg = Math.round(360.0-alpha);
+            if(correctedDeg==360)
+                correctedDeg = 0
+
+            if(alpha!=null)
+                checkStatus(correctedDeg);
+                compassValue.innerHTML = correctedDeg;
+                if (correctedDeg<10) {
+                    compassValue.style.left = "50.5%";
+                } else if (correctedDeg<100) {
+                    compassValue.style.left = "48.5%";
+                } else {
+                    compassValue.style.left = "45%";
+                }
+
+            compass.style.Transform = 'rotate(' + alpha + 'deg)';
+            compass.style.WebkitTransform = 'rotate(' + webkitAlpha + 'deg)';
+            compass.style.MozTransform = 'rotate(-' + alpha + 'deg)';
+        }, false);
+    }
+}
+
+function homeonload(){
+    var user=getCookie('username');
+    //alert('loadinghome');
+    if (user==''){
+        window.location.href='Login.html';
+    }
+    else{
+        document.getElementById('namedisplay').innerHTML=user;
+    }
+    //var roomloader=setInterval(roomList,1000);
+    init(); 
+}
+
+function roomList(){
+    //alert('rl');
+    var discRooms = new XMLHttpRequest();
+	var compass_img = document.getElementById("stacking");
+    discRooms.onreadystatechange= function(){
+        if (discRooms.readyState == 4 && discRooms.status == 200) {
+            var roomList=discRooms.responseText;
+            //alert(fileL);    
+            var ULArr=roomList.split(';');
+            var Arr=ULArr.sort();
+            var RList=document.createElement('ul');
+            var headTag=document.createElement('h4');
+            var headText=document.createTextNode('Rooms:');
+            //var compass_img = document.getElementById("stacking");
+            
+            for(var i=0; i<(Arr.length); i++){
+                //alert(Arr[i]);
+                if (Arr[i]==''){
+                }
+                else{
+                    //Arr[i]= direction,name
+                    var rooms=document.createElement('li');
+                    var name=document.createTextNode(Arr[i]);
+                    rooms.appendChild(name);
+                    RList.appendChild(rooms);
+					
+					var angle = Arr[i]
+					var zpos = i+1;
+					compass_img.innerHTML += '<img src = "images/stack_1.png" style = "width:560px;height:560px;transform-origin: 50% 50%;-webkit-transform-origin: 50% 50%;-moz-transform-origin: 50% 50%;position:absolute;left:26.5%;top:5.5%;z-index:' + zpos + ';transform:rotate(' + (360-angle) + 'deg);" />';
+                }
+				
+            }
+            RList.setAttribute('id','discoverRooms');
+            var parent=document.getElementById('RL');
+            parent.replaceChild(RList, parent.childNodes[0]);
+        }
+    }
+    var timestamp = new Date().getTime();
+    discRooms.open("GET", "php/discRoom.php?&ts="+timestamp, true);
+    discRooms.send();  
+}
+
+function roomCheck(){
+    var username= getCookie('username');
+    //alert ('running');
+
+    var retRoom = new XMLHttpRequest();
+    retRoom.onreadystatechange= function(){
+        if (retRoom.readyState == 4 && retRoom.status == 200) {
+            if (retRoom.responseText=='0'){
+                alert('You have not hosted or joined any room');
+            }
+            else{
+                //alert('itworks');
+                window.location.href='Room.html';
+            }
+        }
+    }
+    retRoom.open("GET", "php/roomList.php?username="+username, true);
+    retRoom.send();  
+}
+
+function checkStatus(degree) {
+    //alert(degree);
+    var compassStatus = new XMLHttpRequest();
+    compassStatus.onreadystatechange = function() {
+        if (compassStatus.readyState == 4 && compassStatus.status == 200) { 
+            document.getElementById("actionButton").innerHTML = compassStatus.responseText;
+            //alert(compassStatus.responseText);
+            //hostOrJoin();
+        }
+    }
+    compassStatus.open("GET", "php/check.php?degree="+degree, true);
+    compassStatus.send();
+} 
+
+
+function hostOrJoin() {
+    var degree=getCompass();
+    var username=getCookie('username');
+    var action=document.getElementById("actionButton").innerHTML;
+    //alert(action);
+    if (action=='Host'){
+        //alert('Hosting');
+        var hostRoom = new XMLHttpRequest(); 
+        hostRoom.onreadystatechange= function() {
+            if (hostRoom.readyState == 4 && hostRoom.status == 200) {
+                if(hostRoom.responseText!==''){
+                    alert('You already hosted a room, please close the room you hosted to host another room')
+                }   
+                else{
+                    var joinRoom = new XMLHttpRequest(); 
+                    joinRoom.onreadystatechange= function() {
+                        if (joinRoom.readyState == 4 && joinRoom.status == 200) {
+                            document.cookie='host='+degree;
+                            document.cookie = "currentroom="+degree;
+                            window.location.href='Room.html';
+                            alert('You hosted Room '+degree);
+                            //alert(joinRoom.responseText);           
+                        }
+                    }    
+                    joinRoom.open("GET", "php/join.php?degree="+degree+"&username="+username, true);
+                    joinRoom.send();  
+                }                           
+            }
+        }
+        hostRoom.open("GET", "php/host.php?degree="+degree+"&username="+username, true);
+        hostRoom.send();      
+    }
+    else{
+        //alert('Joining');
+        var retRoom = new XMLHttpRequest();
+        retRoom.onreadystatechange= function(){
+            if (retRoom.readyState == 4 && retRoom.status == 200) {
+                //alert(retRoom.responseText);
+                if (retRoom.responseText!=='0'){
+                    var roomL=retRoom.responseText;
+                    var unsortedArr=roomL.split(',');
+                    var Arr= unsortedArr.sort();
+
+                    for(var i=1; i<(Arr.length); i++){
+                        //alert(Arr[i]);
+                        //alert('current'+degree);
+                        if (Arr[i]!==degree){
+                            continue;
+                        }
+                        else if(Arr[i]==degree){
+                            document.cookie='currentroom='+degree;
+                            alert('Going to Room '+degree);
+                            window.location.href='Room.html';
+                            break;
+                        }
+                    }
+                    //alert('1');
+                    joinRoom(degree);
+                
+                }
+                else{
+                    //alert('2');
+                    joinRoom(degree);
+                }
+            }   
+        }
+        retRoom.open("GET", "php/roomList.php?username="+username, true);
+        retRoom.send();     
+    }       
+} 
+
+function joinRoom(degree){
+    //alert('Joining');
+    var username=getCookie('username');
+    var joinRoom = new XMLHttpRequest(); 
+    joinRoom.onreadystatechange= function() {
+        if (joinRoom.readyState == 4 && joinRoom.status == 200) {
+            //alert(joinRoom.responseText);
+            document.cookie = "currentroom="+degree;
+            alert('You joined Room '+degree);
+            window.location.href='Room.html';
+                      
+        }
+    }    
+    joinRoom.open("GET", "php/join.php?degree="+degree+"&username="+username, true);
+    joinRoom.send();      
+}
+
+function logout(){
+    //alert('loggingout');
+    var user=getCookie('username');
+    var roomNo='Room'+getCookie('host');
+    var logout = new XMLHttpRequest(); 
+    logout.onreadystatechange= function() {
+        if (logout.readyState == 4 && logout.status == 200) {
+            alert(logout.responseText);
+            document.cookie='currentroom=';
+            document.cookie='host=';
+            document.cookie='username=';
+            window.location.href="Login.html";
+            //alert(logout.responseText);          
+        }
+    }    
+    logout.open("GET", "php/logout.php?username="+user+"&roomNumber="+roomNo, true);
+    logout.send();
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+</script>
+</body>
+</html>

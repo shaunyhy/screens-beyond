@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="themes/YellowBlack.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script> 
+    <script src="http://malsup.github.com/jquery.form.js"></script>
+</head>
+
+<body onload='roomOnload()'>
+
+<style>
+
+#brand{
+    height:15%;
+    width:18%;
+    padding-left:40%;
+}
+
+#compassContainer{
+    padding-left:26%;
+    padding-top:0%;
+    opacity:100%;
+}
+
+#compass{
+    width:75%;
+    height:75%;
+}
+
+#panel, #flip {
+	font-size:25px;
+    padding: 5px;
+    text-align: center;
+}
+
+#panel {
+    display: none;
+}
+
+#flip{
+    border-color:#000000
+}
+#profilePic{
+    width:60%;
+    height:40%;
+    padding-left:50px;
+    padding-top:30px;
+}
+
+h3{
+    text-align:center;
+    font-size:30px;
+}
+
+</style>
+
+<div data-role="page" id='Room' data-theme="a">
+    <div data-role="panel" id="optionPanel" data-position="left" data-position="fixed">
+        <div id="profile">
+            <img src="images/profilePic.PNG" id="profilePic">
+            <h3 id='namedisplay'> Name </h3>
+        </div>
+        <a id='op' data-rel='back' class='ui-btn'>Home</a>
+
+        <button id="flip" class='ui-btn'>Rooms</button>
+        <div id="panel">
+        </div>
+
+        <a id='op' href='Drive.html' class='ui-btn'>History</a>
+        <a id="op" href='Settings.html' class='ui-btn ui-icon-gear ui-btn-icon-left'>Settings</a>
+        <a id="op" href='FAQ.html' class='ui-btn'>FAQ</a>
+        <a id="op" href='LoginPage.html' onclick='logout()' class='ui-btn'>Logout</a>
+    </div> 
+
+    <div data-role="panel" id="files" data-position="right" data-position="fixed">
+        <ul id='test1'> </ul> 
+    </div>
+
+    <script>
+    $(document).ready(function(){
+        $("#flip").click(function(){
+            $("#panel").toggle("slow");
+        });
+    });
+    </script> 
+
+    <div data-role="header" data-type='horizontal'>
+        <a href="#optionPanel" class="ui-btn">Options</a>
+        <img src="images/encompass_title.png" id="brand">
+        <a href="#files" class='ui-btn'>Files</a>
+    </div>
+    <!-- <div data-role='main' class='ui-content'>-->
+        
+    <div data-role="main" class="ui-content">
+        <div id = "compassContainer">
+            <img src = "images/compass.jpg" id ="compass"/>
+        </div>
+        <p id='compassReading' style="text-align:center;">123</p>
+        
+        <div id='butt'> <button > Up or Down </button> </div>
+
+        <div id='up' style="display: none;">
+            <a href="#chooseFile" onclick='fill()' data-rel="popup" class="ui-btn">Upload</a>
+            <div data-role="popup" id="chooseFile" style="min-width:250px;">
+                <form id="myForm"> 
+                    Room: <input type="text" name="roomdegree" id="room" readonly="readonly">
+                    Direction: <input type="text" name="filedegree" id="dir" readonly="readonly">
+                    File: <input type="file" name="file"><br>  
+                    <input type="submit" value="Upload" /> 
+                </form>
+            </div>
+        </div>
+            
+        <div id='down' style="display: none;">
+            <button onclick='download()'>Download</button>
+        </div>
+
+    </div>
+
+    <div data-role="footer" data-position="fixed">
+        <p style="text-align:center;">&#169 Screens and Beyond | ALP 2016</p>
+    </div>
+</div>
+
+<script>
+
+function getCompass(){
+    return '130';
+}   
+
+function roomOnload(){
+    var user=getCookie('username');
+    var room=getCookie('currentroom');
+    var host=getCookie('host');
+    //init();
+    //alert('run');
+    if (room==host){
+        document.getElementById('butt').innerHTML=document.getElementById('up').innerHTML;
+    }
+    else{
+        document.getElementById('butt').innerHTML=document.getElementById('down').innerHTML;
+    }
+    var roomNo=getCookie('currentroom');
+    filelist(roomNo);
+    retrieveRooms();
+    document.getElementById('namedisplay').innerHTML=user;
+}
+
+
+function retrieveRooms(){
+    var username= getCookie('username');
+    //alert ('running');
+    var retRoom = new XMLHttpRequest();
+    retRoom.onreadystatechange= function(){
+        if (retRoom.readyState == 4 && retRoom.status == 200) {
+            //alert(retRoom.responseText);
+            var roomL=retRoom.responseText;
+            var unsortedArr=roomL.split(',');
+            var Arr= unsortedArr.sort();
+            var roomList=document.createElement('select');
+            for(var i=1; i<(Arr.length); i++){
+                var rooms=document.createElement('option');
+                var name=document.createTextNode(Arr[i]);
+                rooms.appendChild(name);
+                rooms.setAttribute('data-value',Arr[i]);
+                roomList.appendChild(rooms);
+            }
+            roomList.setAttribute('id','roomOptions');
+            roomList.setAttribute('onchange','filelist(this.value)');
+            var parent=document.getElementById('panel');
+            parent.replaceChild(roomList, parent.childNodes[0]);
+        }
+    }
+    var timestamp = new Date().getTime();
+    retRoom.open("GET", "php/roomList.php?username="+username+'&ts='+timestamp, true);
+    retRoom.send();  
+}
+
+function filelist(roomNo){
+    var room= 'room'+roomNo;
+    var retFiles = new XMLHttpRequest();
+    retFiles.onreadystatechange= function(){
+
+
+        if (retFiles.readyState == 4 && retFiles.status == 200) {
+            var fileL=retFiles.responseText;
+            //alert(fileL);   
+            var Arr=fileL.split(';');
+            var fileList=document.createElement('ul');
+
+
+            for(var i=0; i<(Arr.length-1); i++){
+                //alert(Arr[i]);
+                if (Arr[i]==','){
+                }
+                else{
+                    var file=Arr[i].split(',');
+                    var files=document.createElement('li');
+                    var name=document.createTextNode(file[1]+' at '+file[0]);
+                    files.appendChild(name);
+                    var idname='encompass'+file[0];
+                    //alert(typeof file[0]);
+                    files.setAttribute('id',idname);
+                    files.setAttribute('data-number',file[1])
+                    fileList.appendChild(files);
+                }
+            }
+            fileList.setAttribute('id','fileList');
+            var parent=document.getElementById('files');
+            parent.replaceChild(fileList, parent.childNodes[0]);
+        }
+    }
+    var timestamp = new Date().getTime();
+    retFiles.open("GET", "php/fileList.php?room="+room+'&ts='+timestamp, true);
+    retFiles.send();  
+}
+
+//UPLOAD:
+$(document).ready(function() { 
+    // bind 'myForm' and provide a simple callback function 
+    $('#myForm').ajaxForm({
+        url: 'php/upload.php',
+        type: 'post',
+        contentType: false,
+        processData: false,
+        success: function(response) { 
+            alert(response);
+            location.reload();
+        } 
+    }); 
+}); 
+
+function download(){
+    var direction= 'encompass'+getCompass();
+    //this is supposed to be compass direction
+
+    var file=document.getElementById(direction);
+    var show=file.getAttribute('data-number');
+    window.open('php/files/'+show);
+}
+
+function fill(){
+    document.getElementById('room').value='room'+getCookie('currentroom');
+    document.getElementById('dir').value=getCompass();
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+</script>
+</body>
+</html>
+

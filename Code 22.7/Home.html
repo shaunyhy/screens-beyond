@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="themes/YellowBlack.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="lib/jquery.mobile.structure-1.4.5.min.css">
+    <script src="lib/jquery.js"></script>
+    <script src="lib/jquery.mobile-1.4.5.js"></script>
+    <script src="lib/jquery.form.js"></script>
+</head>
+
+<body onload='homeonload()'>
+
+<style>
+
+#brand{
+    height:15%;
+    width:18%;
+    padding-left:40%;
+}
+
+#compassContainer{
+    padding-left:26%;
+    padding-top:0%
+}
+
+#compass{
+    width:75%;
+    height:75%;
+}
+
+#panel, #flip {
+	font-size:25px;
+    padding: 5px;
+    text-align: center;
+}
+
+#panel {
+    display: none;
+}
+
+#flip{
+    border-color:#000000
+}
+
+#profilePic{
+    width:60%;
+    height:40%;
+    padding-left:50px;
+    padding-top:30px;
+}
+
+h3{
+    text-align:center;
+    font-size:30px;
+}
+#optionPanel{
+    background-color:#b2b2b2;
+}
+#optionsLogo{
+    width:20%;
+    height:20%;
+   
+
+}
+#optionsbtn{
+    width:8%;
+}
+
+#roomsLogo, #historyLogo,#settingsLogo, #FAQLogo,#logoutLogo {
+    width:10%;
+    height:10%;
+    float:left;
+}
+
+</style>
+
+<div data-role="page" id='Room' data-theme="a">
+    <div data-role="panel" id="optionPanel" data-position="left" data-position="fixed">
+        <div id="profile">
+            <img src="images/profilePic.PNG" id="profilePic">
+            <h3 id='namedisplay'> Name </h3>
+        </div>
+     
+        <a id='op' onclick='roomCheck()' class='ui-btn' id="roomsbtn"><img src="images/rooms.PNG" id="roomsLogo"> Rooms</a>
+        <a id='op' href='Drive.html' class='ui-btn'><img src="images/history.PNG" id="historyLogo">History</a>
+        <a id="op" href='Settings.html' class='ui-btn' ><img src="images/settings.PNG" id="settingsLogo"> Settings</a>
+        <a id="op" href='FAQ.html' class='ui-btn'><img src="images/FAQ.PNG" id="FAQLogo">FAQ</a>
+        <a id="op" href='LoginPage.html' onclick='logout()' class='ui-btn'><img src="images/logout.PNG" id="logoutLogo">Logout</a>
+    </div> 
+    <!--
+    <script>
+    $(document).ready(function(){
+        $("#flip").click(function(){
+            $("#panel").toggle("slow");
+        });
+    });
+    </script> 
+    -->
+    <div data-role="header" data-type='horizontal'>
+        <a href="#optionPanel" class="ui-btn" id="optionsbtn"><img src="images/options.PNG" id="optionsLogo"> Options</a>
+        <img src="images/encompass_title.png" id="brand">
+    </div>
+    <!-- <div data-role='main' class='ui-content'>-->
+        
+    <div data-role="main" class="ui-content">
+        <div id = "compassContainer">
+            <img src = "images/compass.jpg" id ="compass"/>
+        </div>
+        <p id='compassValue' style="text-align:center;">124</p>
+        <button onclick='checkStatus()' id='actionButton'> Host/Join </button>
+        <!--    <a class=ui-btn href="Host.html"> Host </a>
+            <a class=ui-btn href="Join.html"> Join </a>-->
+    </div>
+
+    <div data-role="footer" data-position="fixed">
+        <p style="text-align:center;">&#169 Screens and Beyond | ALP 2016</p>
+    </div>
+</div>
+
+<script>
+
+function getCompass(){
+    var compassReading= document.getElementById('compassValue').innerHTML;
+    return compassReading;
+}
+
+function init(){
+    var compass = document.getElementById('compass');
+    if(window.DeviceOrientationEvent){
+        window.addEventListener('deviceorientation',function(event){
+            var alpha;
+            alpha = event.alpha;
+            webkitAlpha = alpha;
+
+            correctedDeg = Math.round(360.0-alpha);
+            if(correctedDeg==360)
+                correctedDeg = 0
+
+            if(alpha!=null)
+                compassValue.innerHTML =correctedDeg;
+
+            compass.style.Transform = 'rotate(' + alpha + 'deg)';
+            compass.style.WebkitTransform = 'rotate(' + webkitAlpha + 'deg)';
+            compass.style.MozTransform = 'rotate(-' + alpha + 'deg)';
+        }, false);
+    }
+}
+
+
+function homeonload(){
+    var user=getCookie('username');
+    //alert('loadinghome');
+    if (user==''){
+        window.location.href='LoginPage.html';
+    }
+    else{
+        document.getElementById('namedisplay').innerHTML=user;
+    }
+    init();
+}
+
+function roomCheck(){
+    var username= getCookie('username');
+    //alert ('running');
+
+    var retRoom = new XMLHttpRequest();
+    retRoom.onreadystatechange= function(){
+        if (retRoom.readyState == 4 && retRoom.status == 200) {
+            if (retRoom.responseText=='0'){
+                alert('You have not hosted or joined any room');
+            }
+            else{
+                //alert('itworks');
+                window.location.href='Room.html';
+            }
+        }
+    }
+    retRoom.open("GET", "php/roomList.php?username="+username, true);
+    retRoom.send();  
+}
+
+function checkStatus() {
+    var degree=getCompass();
+    //alert(degree);
+    var compassStatus = new XMLHttpRequest();
+    compassStatus.onreadystatechange = function() {
+        if (compassStatus.readyState == 4 && compassStatus.status == 200) { 
+            document.getElementById("actionButton").innerHTML = compassStatus.responseText;
+            //alert(compassStatus.responseText);
+            hostOrJoin();
+        }
+    }
+    compassStatus.open("GET", "php/check.php?degree="+degree, true);
+    compassStatus.send();
+} 
+
+function hostOrJoin() {
+    var degree=getCompass();
+    var username=getCookie('username');
+    var action=document.getElementById("actionButton").innerHTML;
+    //alert(action);
+    if (action=='Host'){
+        //alert('Hosting');
+        var hostRoom = new XMLHttpRequest(); 
+        hostRoom.onreadystatechange= function() {
+            if (hostRoom.readyState == 4 && hostRoom.status == 200) {
+                if(hostRoom.responseText!==''){
+                    alert('You already hosted a room, please close the room you hosted to host another room')
+                }   
+                else{
+                    var joinRoom = new XMLHttpRequest(); 
+                    joinRoom.onreadystatechange= function() {
+                        if (joinRoom.readyState == 4 && joinRoom.status == 200) {
+                            document.cookie='host='+degree;
+                            document.cookie = "currentroom="+degree;
+                            window.location.href='Room.html';
+                            alert('You hosted Room '+degree);
+                            //alert(joinRoom.responseText);           
+                        }
+                    }    
+                    joinRoom.open("GET", "php/join.php?degree="+degree+"&username="+username, true);
+                    joinRoom.send();  
+                }                           
+            }
+        }
+        hostRoom.open("GET", "php/host.php?degree="+degree+"&username="+username, true);
+        hostRoom.send();      
+    }
+    else{
+        //alert('Just Joining');
+        var retRoom = new XMLHttpRequest();
+        retRoom.onreadystatechange= function(){
+            if (retRoom.readyState == 4 && retRoom.status == 200) {
+                //alert(retRoom.responseText);
+                if (retRoom.responseText!=='0'){
+                    var roomL=retRoom.responseText;
+                    var unsortedArr=roomL.split(',');
+                    var Arr= unsortedArr.sort();
+
+                    for(var i=1; i<(Arr.length); i++){
+                        //alert(Arr[i]);
+                        if (Arr[i]!==degree){
+                        }
+                        else{
+                            document.cookie='currentroom='+degree;
+                            window.location.href='Room.html';
+                            alert('Going to Room '+degree);
+                            return'';
+                        }
+                        var joinRoom = new XMLHttpRequest(); 
+                        joinRoom.onreadystatechange= function() {
+                            if (joinRoom.readyState == 4 && joinRoom.status == 200) {
+                                document.cookie = "currentroom="+degree;
+                                alert('You joined Room '+degree);
+                                window.location.href='Room.html';
+                                //alert(joinRoom.responseText);          
+                            }
+                        }    
+                        joinRoom.open("GET", "php/join.php?degree="+degree+"&username="+username, true);
+                        joinRoom.send();         
+                    }
+                }
+                else{
+                    var joinRoom = new XMLHttpRequest(); 
+                    joinRoom.onreadystatechange= function() {
+                        if (joinRoom.readyState == 4 && joinRoom.status == 200) {
+                            document.cookie = "currentroom="+degree;
+                            alert('You joined Room '+degree);
+                            window.location.href='Room.html';
+                            //alert(joinRoom.responseText);          
+                        }
+                    }    
+                    joinRoom.open("GET", "php/join.php?degree="+degree+"&username="+username, true);
+                    joinRoom.send();      
+                }
+            }   
+        }
+        retRoom.open("GET", "php/roomList.php?username="+username, true);
+        retRoom.send();     
+    }       
+} 
+
+function logout(){
+    alert('loggintout');
+    var user=getCookie('username');
+    var roomNo='Room'+getCookie('host');
+    var logout = new XMLHttpRequest(); 
+    logout.onreadystatechange= function() {
+        if (logout.readyState == 4 && logout.status == 200) {
+            alert(logout.responseText);
+            document.cookie='currentroom=';
+            document.cookie='host=';
+            document.cookie='username=';
+            window.location.href="LoginPage.html";
+            //alert(logout.responseText);          
+        }
+    }    
+    logout.open("GET", "php/logout.php?username="+user+"&roomNumber="+roomNo, true);
+    logout.send();
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+</script>
+</body>
+</html>
